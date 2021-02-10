@@ -1,5 +1,5 @@
 <template>
-	<div id="app" class="bg-black test">
+	<div id="app" class="bg-yellow">
 		<div id="nav">
 			<router-link to="/">Home</router-link>
 			|
@@ -11,5 +11,6 @@
 
 
 <style lang="scss">
-@import "/static/color.scss";
+@import "/static/color";
+@import "/static/flex";
 </style>
