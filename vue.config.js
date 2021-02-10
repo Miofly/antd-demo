@@ -3,13 +3,14 @@ const glob = require("glob-all");
 
 // 分析代码体积工具
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// 压缩优化 js 去除日志
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const PurgecssPlugin = require("purgecss-webpack-plugin");
 
 // 判断是否生产环境
 const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV)
 
-console.log(IS_PROD)
 module.exports = {
 	publicPath: process.env.NODE_ENV === 'production' ? '' : '/',
 	outputDir: 'dist',
@@ -37,29 +38,47 @@ module.exports = {
 				whitelistPatternsChildren: [/^token/, /^pre/, /^code/]
 			})
 		);
+		plugins.push(
+			new UglifyJsPlugin({
+				uglifyOptions: {
+					compress: { // 启用压缩功能
+						dead_code: true, // 移除没被引用的代码
+						unused: true, // 干掉没有被引用的函数和变量
+						drop_console: true, // 去除console.*函数
+						drop_debugger: false, // 移除 debugger
+						pure_funcs: ['console.log'], // 移除console
+						passes: 1 //  默认 1。运行压缩的次数。在某些情况下，用一个大于1的数字参数可以进一步压缩代码大小。注意：数字越大压缩耗时越长。
+					}
+				},
+				sourceMap: false,
+				parallel: true  // 使用多进程并行运行来提高构建速度
+			})
+		);
 		config.plugins = [...config.plugins, ...plugins];
 
-		// if (IS_PROD) {
+		if (IS_PROD) {
 			config.externals = {
 				vue: 'Vue',
 				'vue-router': 'VueRouter',
 				vuex: 'Vuex',
 				axios: 'axios'
 			}
-		// }
+		}
 	},
 	chainWebpack: (config) => {
-		// 代码分析插件
-		config.plugin('webpack-bundle-analyzer').use(BundleAnalyzerPlugin).init(Plugin => new Plugin({
-			analyzerMode: 'server', // 在`server`模式下，分析器将启动HTTP服务器来显示软件包报告。
-			analyzerHost: '127.0.0.1',
-			analyzerPort: 3000,
-			defaultSizes: 'parsed', // 模块大小默认显示在报告中。应该是`stat`，`parsed`或者`gzip`中的一个。
-			openAnalyzer: true, // 在默认浏览器中自动打开报告
-			logLevel: 'info' // 日志级别
-		}))
+		if (IS_PROD) {
+			// 代码分析插件
+			config.plugin('webpack-bundle-analyzer').use(BundleAnalyzerPlugin).init(Plugin => new Plugin({
+				analyzerMode: 'server', // 在`server`模式下，分析器将启动HTTP服务器来显示软件包报告。
+				analyzerHost: '127.0.0.1',
+				analyzerPort: 3000,
+				defaultSizes: 'parsed', // 模块大小默认显示在报告中。应该是`stat`，`parsed`或者`gzip`中的一个。
+				openAnalyzer: true, // 在默认浏览器中自动打开报告
+				logLevel: 'info' // 日志级别
+			}))
 
-		// if (IS_PROD) {
+
+			// cdn 资源加载
 			const cdn = {
 				js: [
 					'https://unpkg.com/vue@2.6.10/dist/vue.min.js', // 访问https://unpkg.com/vue/dist/vue.min.js获取最新版本
@@ -72,10 +91,9 @@ module.exports = {
 			// html中添加cdn
 			config.plugin('html').tap(args => {
 				args[0].cdn = cdn
-				console.log(cdn)
 				return args
 			})
-		// }
+		}
 	},
 	css: {
 		loaderOptions: {
