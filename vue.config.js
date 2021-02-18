@@ -7,9 +7,32 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const PurgecssPlugin = require("purgecss-webpack-plugin");
+const purgecss = require('@fullhuman/postcss-purgecss')
 
 // 判断是否生产环境
 const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV)
+
+// gzip压缩
+const CompressionWebpackPlugin = require("compression-webpack-plugin");
+
+// 利用cdn加载
+const assetsCDN = {
+	// webpack build externals
+	externals: {
+		vue: 'Vue',
+		'vue-router': 'VueRouter',
+		vuex: 'Vuex',
+		axios: 'axios'
+	},
+	css: [],
+	// https://unpkg.com/browse/vue@2.6.10/
+	js: [
+		'//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js',
+		'//cdn.jsdelivr.net/npm/vue-router@3.1.3/dist/vue-router.min.js',
+		'//cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js',
+		'//cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js'
+	]
+}
 
 module.exports = {
 	publicPath: process.env.NODE_ENV === 'production' ? '' : '/',
@@ -24,46 +47,64 @@ module.exports = {
 	 */
 	productionSourceMap: false, // 是否在构建生产包时生成 sourceMap 文件，false将提高构建速度
 	configureWebpack: config => {
-		const plugins = [];
-		//去掉不用的css 多余的css
-		plugins.push(
-			new PurgecssPlugin({
-				paths: glob.sync([ // glob-all可以设置多条路径
-					path.join(__dirname, './src/index.html'),
-					path.join(__dirname, './**/*.vue'),
-					path.join(__dirname, './src/**/*.js')]
-				),
-				whitelist: ["html", "body"],
-				whitelistPatterns: [/el-.*/],
-				whitelistPatternsChildren: [/^token/, /^pre/, /^code/]
-			})
-		);
-		plugins.push(
-			new UglifyJsPlugin({
-				uglifyOptions: {
-					compress: { // 启用压缩功能
-						dead_code: true, // 移除没被引用的代码
-						unused: true, // 干掉没有被引用的函数和变量
-						drop_console: true, // 去除console.*函数
-						drop_debugger: false, // 移除 debugger
-						pure_funcs: ['console.log'], // 移除console
-						passes: 1 //  默认 1。运行压缩的次数。在某些情况下，用一个大于1的数字参数可以进一步压缩代码大小。注意：数字越大压缩耗时越长。
-					}
-				},
-				sourceMap: false,
-				parallel: true  // 使用多进程并行运行来提高构建速度
-			})
-		);
-		config.plugins = [...config.plugins, ...plugins];
-
 		if (IS_PROD) {
+			const plugins = [];
+			plugins.push(
+				new CompressionWebpackPlugin({
+					test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i, // 需要压缩的文件类型
+					threshold: 10240, // 归档需要进行压缩的文件大小最小值，我这个是10K以上的进行压缩
+					deleteOriginalAssets: false, // 是否删除原文件
+					// filename: "[path].gz[query]",
+					algorithm: "gzip",
+					minRatio: 0.8
+				})
+			);
+			//去掉不用的css 多余的css
+			plugins.push(
+				// new PurgecssPlugin({
+				// 	paths: glob.sync([ // glob-all可以设置多条路径 指定要由 PurgeCSS 分析的檔案路徑
+				// 		path.join(__dirname, './src/index.html'),
+				// 		path.join(__dirname, './**/*.vue'),
+				// 		path.join(__dirname, './src/**/*.js')]
+				// 	),
+				// 	extractors: [
+				// 		{
+				// 			extractor: class Extractor {
+				// 				static extract(content) {
+				// 					const validSection = content.replace(
+				// 						/<style([\s\S]*?)<\/style>+/gim,
+				// 						""
+				// 					);
+				// 					return validSection.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || []
+				// 				}
+				// 			},
+				// 			extensions: ["html", "vue"]
+				// 		}
+				// 	],
+				// 	whitelist: ["html", "body"], // 指定不該被刪除的 CSS 樣式 (具體名稱)
+				// 	whitelistPatterns: [/el-.*/, /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!cursor-move).+-move$/, /^router-link(|-exact)-active$/],
+				// 	whitelistPatternsChildren: [/^.ant/, /^ant/, /^pre/, /^code/]
+				// })
+			);
+			plugins.push(
+				new UglifyJsPlugin({
+					uglifyOptions: {
+						compress: { // 启用压缩功能
+							dead_code: true, // 移除没被引用的代码
+							unused: true, // 干掉没有被引用的函数和变量
+							drop_console: true, // 去除console.*函数
+							drop_debugger: false, // 移除 debugger
+							pure_funcs: ['console.log'], // 移除console
+							passes: 1 //  默认 1。运行压缩的次数。在某些情况下，用一个大于1的数字参数可以进一步压缩代码大小。注意：数字越大压缩耗时越长。
+						}
+					},
+					sourceMap: false,
+					parallel: true  // 使用多进程并行运行来提高构建速度
+				})
+			);
+			config.plugins = [...config.plugins, ...plugins];
 			// 防止将某些 import 的包(package)打包到 bundle 中，而是在运行时(runtime)再去从外部获取这些扩展依赖
-			config.externals = {
-				vue: 'Vue',
-				'vue-router': 'VueRouter',
-				vuex: 'Vuex',
-				axios: 'axios'
-			}
+			config.externals = assetsCDN.externals
 		}
 	},
 	chainWebpack: (config) => {
@@ -78,37 +119,33 @@ module.exports = {
 				logLevel: 'info' // 日志级别
 			}))
 
-
-			// cdn 资源加载
-			const cdn = {
-				js: [
-					'https://unpkg.com/vue@2.6.10/dist/vue.min.js', // 访问https://unpkg.com/vue/dist/vue.min.js获取最新版本
-					'https://unpkg.com/vue-router@3.0.6/dist/vue-router.min.js',
-					'https://unpkg.com/vuex@3.1.1/dist/vuex.min.js',
-					'https://unpkg.com/axios@0.19.0/dist/axios.min.js',
-				]
-			};
-
 			// html中添加cdn
 			config.plugin('html').tap(args => {
-				args[0].cdn = cdn
+				args[0].cdn = assetsCDN
 				return args
 			})
 		}
 	},
 	css: {
 		loaderOptions: {
-			postcss: { // 浏览器增加前缀
-				plugins: [
-					require('autoprefixer')({
-						browsers : [
-							'last 1 version', // 例如 last 80 version 可给大部分浏览器增加前缀
-							'> 1%',
-							'IE 10'
-						]
-					})
-				]
-			}
+			less: {
+				modifyVars: {
+					'border-radius-base': '2px'
+				},
+				// DO NOT REMOVE THIS LINE
+				javascriptEnabled: true
+			},
+			// postcss: { // 浏览器增加前缀
+			// 	plugins: [
+			// 		require('autoprefixer')({
+			// 			browsers : [
+			// 				'last 1 version', // 例如 last 80 version 可给大部分浏览器增加前缀
+			// 				'> 1%',
+			// 				'IE 10'
+			// 			]
+			// 		})
+			// 	]
+			// }
 		}
 	}
 }

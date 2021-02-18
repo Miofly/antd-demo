@@ -10,7 +10,5 @@
 </template>
 
 
-<style lang="scss">
-@import "/static/color";
-@import "/static/flex";
+<style>
 </style>
