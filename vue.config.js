@@ -135,17 +135,28 @@ module.exports = {
 				// DO NOT REMOVE THIS LINE
 				javascriptEnabled: true
 			},
-			// postcss: { // 浏览器增加前缀
-			// 	plugins: [
-			// 		require('autoprefixer')({
-			// 			browsers : [
-			// 				'last 1 version', // 例如 last 80 version 可给大部分浏览器增加前缀
-			// 				'> 1%',
-			// 				'IE 10'
-			// 			]
-			// 		})
-			// 	]
-			// }
+			postcss: { // 浏览器增加前缀
+				plugins: [
+					// require('autoprefixer')({
+					// 	browsers : [
+					// 		'last 1 version', // 例如 last 80 version 可给大部分浏览器增加前缀
+					// 		'> 1%',
+					// 		'IE 10'
+					// 	]
+					// }),
+					require('@fullhuman/postcss-purgecss')({
+						content: [
+							'./public/*.html',
+							'./src/**/*.vue'
+						],
+						defaultExtractor(content) {
+							const contentWithoutStyleBlocks = content.replace(/<style[^]+?<\/style>/gi, '');
+							return contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || [];
+						},
+						safelist: [/ant-*/, /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!(|.*?:)cursor-move).+-move$/, /^router-link(|-exact)-active$/, /data-v-.*/]
+					})
+				]
+			}
 		}
 	}
 }

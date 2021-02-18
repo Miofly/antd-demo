@@ -1,5 +1,5 @@
 <template>
-	<div class="home">
+	<div class="home mttest">
 		<div v-for="(item, index) in 3" :key="index">
 			{{index}}
 		</div>
