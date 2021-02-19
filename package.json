@@ -29,7 +29,7 @@
         "glob-all": "^3.2.1",
         "less": "^3.0.4",
         "less-loader": "^5.0.0",
-        "postcss": "^7.1.8",
+        "postcss": "^7.0.18",
         "postcss-import": "^14.0.0",
         "postcss-loader": "^4.0.2",
         "purgecss-webpack-plugin": "^4.0.0",

@@ -1,6 +1,6 @@
 const path = require('path')
 const glob = require("glob-all");
-
+const os = require('os');
 // 分析代码体积工具
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 // 压缩优化 js 去除日志
