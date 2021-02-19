@@ -7,18 +7,13 @@
 	<link rel="icon" href="<%= BASE_URL %>favicon.ico">
 	<title><%= htmlWebpackPlugin.options.title %></title>
 	<!-- 使用CDN的CSS文件 -->
-	<% for (var i in htmlWebpackPlugin.options.cdn &&
-	htmlWebpackPlugin.options.cdn.css) { %>
+	<% for (var i in htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.css) { %>
 	<link rel="stylesheet" href="<%= htmlWebpackPlugin.options.cdn.css[i] %>" />
 	<% } %>
 
 	<!-- 使用CDN的JS文件 -->
-	<% for (var i in htmlWebpackPlugin.options.cdn &&
-	htmlWebpackPlugin.options.cdn.js) { %>
-	<script
-			type="text/javascript"
-			src="<%= htmlWebpackPlugin.options.cdn.js[i] %>"
-	></script>
+	<% for (var i in htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.js) { %>
+	<script type="text/javascript" src="<%= htmlWebpackPlugin.options.cdn.js[i] %>"></script>
 	<% } %>
 </head>
 <body>

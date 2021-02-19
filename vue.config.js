@@ -34,6 +34,22 @@ const assetsCDN = {
 	]
 }
 
+// 获取真实IP地址
+function getIpAddress () {
+	const interfaces = os.networkInterfaces()
+	for (const devName in interfaces) {
+		if (devName == 'WLAN') {
+			const iface = interfaces[devName]
+			for (let i = 0; i < iface.length; i++) {
+				const alias = iface[i]
+				if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+					return alias.address
+				}
+			}
+		}
+	}
+}
+
 module.exports = {
 	publicPath: process.env.NODE_ENV === 'production' ? '' : '/',
 	outputDir: 'dist',
@@ -158,5 +174,9 @@ module.exports = {
 				]
 			}
 		}
+	},
+	devServer: { // 开发环境跨域处理
+		host: getIpAddress(),
+		open: true,
 	}
 }
