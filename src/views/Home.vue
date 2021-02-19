@@ -1,9 +1,9 @@
 <template>
-	<div class="home mttest">
+	<div class="home flex" style="-webkit-animation: fade 2s linear 0s infinite alternate;-o-animation: fade 2s linear 0s infinite alternate;animation: fade 2s linear 0s infinite alternate;">
 		<div v-for="(item, index) in 3" :key="index">
 			{{index}}
 		</div>
-		<a-button type="primary">asda 测试</a-button>
+<!--		<a-button type="primary">asda 测试</a-button>-->
 	</div>
 </template>
 
@@ -22,8 +22,6 @@ export default {
 }
 </script>
 
-<style>
-.mttest{
-background-color: black;
-}
+<style lang="less">
+@import "~@/static/flex.less";
 </style>
