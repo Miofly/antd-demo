@@ -3,4 +3,4 @@ import {
 	Button,
 } from 'ant-design-vue'
 
-// Vue.use(Button)
+Vue.use(Button)

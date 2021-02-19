@@ -3,7 +3,7 @@
 		<div v-for="(item, index) in 3" :key="index">
 			{{index}}
 		</div>
-<!--		<a-button type="primary">asda 测试</a-button>-->
+		<a-button type="primary">asda 测试</a-button>
 	</div>
 </template>
 

@@ -78,33 +78,17 @@ module.exports = {
 					minRatio: 0.8
 				})
 			);
-			//去掉不用的css 多余的css 有 bug 暂未处理
-			plugins.push(
-				// new PurgecssPlugin({
-				// 	paths: glob.sync([ // glob-all可以设置多条路径 指定要由 PurgeCSS 分析的檔案路徑
-				// 		path.join(__dirname, './src/index.html'),
-				// 		path.join(__dirname, './**/*.vue'),
-				// 		path.join(__dirname, './src/**/*.js')]
-				// 	),
-				// 	extractors: [
-				// 		{
-				// 			extractor: class Extractor {
-				// 				static extract(content) {
-				// 					const validSection = content.replace(
-				// 						/<style([\s\S]*?)<\/style>+/gim,
-				// 						""
-				// 					);
-				// 					return validSection.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || []
-				// 				}
-				// 			},
-				// 			extensions: ["html", "vue"]
-				// 		}
-				// 	],
-				// 	whitelist: ["html", "body"], // 指定不該被刪除的 CSS 樣式 (具體名稱)
-				// 	whitelistPatterns: [/el-.*/, /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!cursor-move).+-move$/, /^router-link(|-exact)-active$/],
-				// 	whitelistPatternsChildren: [/^.ant/, /^ant/, /^pre/, /^code/]
-				// })
-			);
+			// plugins.push(
+			// 	new CompressionWebpackPlugin({
+			// 		test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
+			// 		threshold: 10240, // 归档需要进行压缩的文件大小最小值，我这个是10K以上的进行压缩
+			// 		deleteOriginalAssets: false, // 是否删除原文件
+			// 		algorithm(input, compressionOptions, callback) {
+			// 			return zopfli.gzip(input, compressionOptions, callback);
+			// 		},
+			// 		minRatio: 0.8,
+			// 	})
+			// );
 			plugins.push(
 				new UglifyJsPlugin({
 					uglifyOptions: {
@@ -121,26 +105,12 @@ module.exports = {
 					parallel: true  // 使用多进程并行运行来提高构建速度
 				})
 			);
-
-			// plugins.push(
-			// 	new CompressionWebpackPlugin({
-			// 		algorithm(input, compressionOptions, callback) {
-			// 			return zopfli.gzip(input, compressionOptions, callback);
-			// 		},
-			// 		compressionOptions: {
-			// 			numiterations: 15
-			// 		},
-			// 		minRatio: 0.99,
-			// 		test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
-			// 	})
-			// );
-			// plugins.push(
-			// 	new BrotliPlugin({
-			// 		test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
-			// 		minRatio: 0.99
-			// 	})
-			// );
-
+			plugins.push(
+				new BrotliPlugin({
+					test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
+					minRatio: 0.99
+				})
+			);
 			config.plugins = [...config.plugins, ...plugins];
 			// 防止将某些 import 的包(package)打包到 bundle 中，而是在运行时(runtime)再去从外部获取这些扩展依赖
 			config.externals = assetsCDN.externals
@@ -184,18 +154,13 @@ module.exports = {
 					// 	]
 					// }),
 					require('@fullhuman/postcss-purgecss')({
-						content: [
-							'*.html',
-							'./**/**/*.vue',
-							'./**/**/*.less'
-						], // 指定 Purgecss 需要分析的内容
-						// PurgeCSS 可以根据你的需要进行调整。如果你注意到大量未被使用的 css 没有被删除，你可能需要使用自定义提取器了。提取器可以应用于具有某些扩展名的文件。如果你希望对所有类型的文件使用相同的提取器，请通过 defaultExtractor 参数指定提取器。
+						content: [`./public/index.html`, `./src/components/*.vue`, `./src/views/*.vue`],
 						defaultExtractor(content) {
-							const contentWithoutStyleBlocks = content.replace(/<style[^]+?<\/style>/gi, '');
-							return contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || [];
+							const contentWithoutStyleBlocks = content.replace(/<style[^]+?<\/style>/gi, '')
+							return contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || []
 						},
-						keyframes: false,
-						// safelist: [/ant-*/, /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!(|.*?:)cursor-move).+-move$/, /^router-link(|-exact)-active$/, /data-v-.*/]
+						whitelist: [],
+						safelist: [/ant-*/, /-(leave|enter|appear)(|-(to|from|active))$/, /^(?!(|.*?:)cursor-move).+-move$/, /^router-link(|-exact)-active$/, /data-v-.*/]
 					})
 				]
 			}
