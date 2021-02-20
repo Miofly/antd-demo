@@ -101,7 +101,7 @@ module.exports = {
 							passes: 1 //  默认 1。运行压缩的次数。在某些情况下，用一个大于1的数字参数可以进一步压缩代码大小。注意：数字越大压缩耗时越长。
 						}
 					},
-					sourceMap: false,
+					sourceMap: false, // 使用源映射将错误信息位置映射到模块（这将会减慢编译速度）
 					parallel: true  // 使用多进程并行运行来提高构建速度
 				})
 			);
@@ -118,6 +118,33 @@ module.exports = {
 	},
 	chainWebpack: (config) => {
 		if (IS_PROD) {
+			config.module.rule("images")
+			.test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
+			.use('url-loader')
+			.loader('url-loader')
+			.tap(options => Object.assign(options, { limit: 1000 }))
+			.end()
+			.use("image-webpack-loader")
+			.loader("image-webpack-loader")
+			.options({
+				mozjpeg: { // 压缩JPEG图像
+					progressive: true,
+					quality: 65,
+				},
+				optipng: { // 压缩PNG图像
+					enabled: false, // 表示不啟用這一個圖片優化器
+				},
+				pngquant: { // 压缩PNG图像
+					quality: [0.65, 0.9],
+					speed: 4,
+				},
+				gifsicle: { // 压缩GIF图像
+					interlaced: false,
+				},
+				webp: { // 将JPG和PNG图像压缩为WEBP
+					quality: 75, // 配置選項表示啟用 WebP 優化器
+				},
+			});
 			// 代码分析插件
 			config.plugin('webpack-bundle-analyzer').use(BundleAnalyzerPlugin).init(Plugin => new Plugin({
 				analyzerMode: 'server', // 在`server`模式下，分析器将启动HTTP服务器来显示软件包报告。

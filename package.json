@@ -29,6 +29,7 @@
         "brotli-webpack-plugin": "^1.1.0",
         "compression-webpack-plugin": "^5.0.1",
         "glob-all": "^3.2.1",
+        "image-webpack-loader": "^7.0.1",
         "less": "^3.0.4",
         "less-loader": "^5.0.0",
         "postcss": "^7.0.18",
