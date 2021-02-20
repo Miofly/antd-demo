@@ -68,27 +68,16 @@ module.exports = {
 			const plugins = [];
 			// gzip打包
 			plugins.push(
-				// 仅使用 CompressionWebpackPlugin
 				new CompressionWebpackPlugin({
-					test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i, // 需要压缩的文件类型
+					test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
 					threshold: 10240, // 归档需要进行压缩的文件大小最小值，我这个是10K以上的进行压缩
 					deleteOriginalAssets: false, // 是否删除原文件
-					// filename: "[path].gz[query]",
-					algorithm: "gzip",
-					minRatio: 0.8
+					algorithm(input, compressionOptions, callback) {
+						return zopfli.gzip(input, compressionOptions, callback);
+					},
+					minRatio: 0.8,
 				})
 			);
-			// plugins.push(
-			// 	new CompressionWebpackPlugin({
-			// 		test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
-			// 		threshold: 10240, // 归档需要进行压缩的文件大小最小值，我这个是10K以上的进行压缩
-			// 		deleteOriginalAssets: false, // 是否删除原文件
-			// 		algorithm(input, compressionOptions, callback) {
-			// 			return zopfli.gzip(input, compressionOptions, callback);
-			// 		},
-			// 		minRatio: 0.8,
-			// 	})
-			// );
 			plugins.push(
 				new UglifyJsPlugin({
 					uglifyOptions: {
@@ -105,12 +94,12 @@ module.exports = {
 					parallel: true  // 使用多进程并行运行来提高构建速度
 				})
 			);
-			plugins.push(
-				new BrotliPlugin({
-					test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
-					minRatio: 0.99
-				})
-			);
+			// plugins.push(
+			// 	new BrotliPlugin({
+			// 		test: /\.(js|css|json|txt|html|ico|svg)(\?.*)?$/i,
+			// 		minRatio: 0.99
+			// 	})
+			// );
 			config.plugins = [...config.plugins, ...plugins];
 			// 防止将某些 import 的包(package)打包到 bundle 中，而是在运行时(runtime)再去从外部获取这些扩展依赖
 			config.externals = assetsCDN.externals
