@@ -1,23 +1,27 @@
 {
     "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "strict": true,
-        "jsx": "preserve",
-        "importHelpers": true,
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-        "skipLibCheck": true,
-        "esModuleInterop": true,
+        "baseUrl": ".", // 基准路径
+        "skipLibCheck": true, // 忽略所有的声明文件（ *.d.ts）的类型检查。 可以忽略 types 配置的文件
+        "experimentalDecorators": true, // 启用实验性的ES装饰器。
+        "target": "ES5", // 编译输出目标 ES 版本
+        "downlevelIteration": true, // TypeScript 2.3 在 ES3 和 ES5 为编译目标时由--downlevelIteration编译选项增加了完整的对生成器和迭代器协议的支持。
+        "esModuleInterop": true, // 允许从没有设置默认导出的模块中默认导入
+        "resolveJsonModule": true, // 引入json文件时使用
+        "allowJs": false, // 允许编译javascript文件。
+        "allowUnreachableCode": false, // 不报告执行不到的代码错误。
+        "allowUnusedLabels": false, // 不报告未使用的标签错误。
+        "alwaysStrict": false, // 以严格模式解析并为每个源文件生成 "use strict"语句
+        "strictFunctionTypes": false, // 禁用函数参数双向协变检查。
         "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
-        "baseUrl": ".",
+        "skipDefaultLibCheck": true, // 忽略 库的默认声明文件的类型检查。
         "types": [
+            "node",
+            "jest",
             "webpack-env"
         ],
         "paths": {
             "@/*": [
-                "src/*"
+                "./src/*"
             ]
         },
         "lib": [
@@ -29,11 +33,10 @@
     },
     "include": [
         "src/**/*.ts",
+        "src/**/**/*.ts",
         "src/*.ts",
         "src/**/*.tsx",
-        "src/**/*.vue",
-        "tests/**/*.ts",
-        "tests/**/*.tsx"
+        "src/**/*.vue"
     ],
     "exclude": [
         "node_modules"
