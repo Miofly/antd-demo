@@ -1,7 +1,6 @@
 <template>
 	<div id="app">
-		<meta name="referrer" content="no-referrer">
-		<router-view v-if="isRouterAlive"/>
+		<router-view/>
 	</div>
 </template>
 
